@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IFSC District Splitter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #f5f7fb;
+            color: #20242c;
+            font-family: "Segoe UI", Arial, sans-serif;
+            padding: 28px;
+        }
+
+        .shell {
+            width: min(860px, 100%);
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: #ffffff;
+            border: 1px solid #dde3ee;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(25, 38, 70, 0.08);
+            padding: 28px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-start;
+            margin-bottom: 22px;
+        }
+
+        h1 {
+            font-size: 28px;
+            line-height: 1.2;
+            margin: 0 0 6px;
+        }
+
+        .subtitle {
+            margin: 0;
+            color: #657083;
+            font-size: 14px;
+        }
+
+        .port {
+            background: #eef6f1;
+            color: #286341;
+            border: 1px solid #cbe7d6;
+            border-radius: 999px;
+            padding: 7px 11px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .upload-area {
+            border: 2px dashed #7992c6;
+            border-radius: 8px;
+            background: #f8fbff;
+            padding: 34px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: #2f63b7;
+            background: #f1f6ff;
+        }
+
+        .upload-icon {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        .upload-title {
+            margin: 0 0 6px;
+            font-weight: 700;
+        }
+
+        .upload-note {
+            margin: 0;
+            color: #707b8e;
+            font-size: 14px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .btn {
+            appearance: none;
+            border: 0;
+            border-radius: 6px;
+            background: #255fb8;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            min-height: 42px;
+            padding: 0 18px;
+        }
+
+        .btn.secondary {
+            background: #edf2f8;
+            color: #23324a;
+            border: 1px solid #d7e0ec;
+        }
+
+        .btn.success {
+            background: #237a45;
+        }
+
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        .file-info,
+        .mapping,
+        .summary,
+        .status,
+        .files-section {
+            display: none;
+            margin-top: 18px;
+            border-radius: 8px;
+            border: 1px solid #dde3ee;
+            padding: 16px;
+        }
+
+        .show {
+            display: block;
+        }
+
+        .file-info,
+        .mapping,
+        .summary,
+        .files-section {
+            background: #ffffff;
+        }
+
+        .file-name {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .muted {
+            color: #6d7788;
+            font-size: 14px;
+        }
+
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #344157;
+            margin-bottom: 7px;
+        }
+
+        select {
+            width: 100%;
+            min-height: 42px;
+            border: 1px solid #cbd5e4;
+            border-radius: 6px;
+            background: #ffffff;
+            color: #20242c;
+            font-size: 14px;
+            padding: 0 10px;
+        }
+
+        .sample {
+            margin-top: 16px;
+            overflow-x: auto;
+            border: 1px solid #e2e7f0;
+            border-radius: 6px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 520px;
+            font-size: 12px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #e8edf5;
+            padding: 8px 10px;
+            text-align: left;
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f4f7fb;
+            color: #344157;
+            font-weight: 700;
+        }
+
+        .status {
+            white-space: pre-wrap;
+        }
+
+        .status.success {
+            background: #eaf7ef;
+            border-color: #bee5cc;
+            color: #14562f;
+        }
+
+        .status.error {
+            background: #fff0f0;
+            border-color: #f1c7c7;
+            color: #842323;
+        }
+
+        .status.info {
+            background: #eef6ff;
+            border-color: #c9ddf5;
+            color: #244d7a;
+        }
+
+        .progress {
+            display: none;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .progress.show {
+            display: block;
+        }
+
+        .progress span {
+            display: block;
+            height: 100%;
+            width: 45%;
+            background: #255fb8;
+            border-radius: 999px;
+            animation: slide 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes slide {
+            from { transform: translateX(-70%); }
+            to { transform: translateX(180%); }
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .metric {
+            background: #f7f9fc;
+            border: 1px solid #e1e7f0;
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .metric-value {
+            display: block;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .metric-label {
+            color: #667083;
+            font-size: 12px;
+        }
+
+        .district-list {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .district-item,
+        .file-list-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            border-top: 1px solid #edf1f6;
+            padding: 10px 0;
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        a {
+            color: #255fb8;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 14px;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+
+            .header,
+            .mapping-grid,
+            .summary-grid {
+                grid-template-columns: 1fr;
+                display: grid;
+            }
+
+            .port {
+                width: fit-content;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <section class="panel">
+            <div class="header">
+                <div>
+                    <h1>IFSC District Splitter</h1>
+                    <p class="subtitle">Split uploaded Excel or CSV rows by IFSC first, then Pincode, with unmatched rows in Other.</p>
+                </div>
+                <div class="port">localhost:5001</div>
+            </div>
+
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">[ ]</div>
+                    <p class="upload-title">Choose or drag a file</p>
+                    <p class="upload-note">.xlsx, .xls, or .csv up to 50 MB</p>
+                    <input type="file" id="fileInput" name="file" accept=".xlsx,.xls,.csv">
+                </div>
+
+                <div class="file-info" id="fileInfo">
+                    <div class="file-name" id="fileName"></div>
+                    <div class="muted" id="fileSize"></div>
+                </div>
+
+                <div class="actions">
+                    <button type="button" class="btn secondary" id="chooseBtn">Choose File</button>
+                    <button type="submit" class="btn" id="previewBtn" disabled>Read Columns</button>
+                </div>
+            </form>
+
+            <div class="progress" id="progress"><span></span></div>
+            <div class="status" id="status"></div>
+
+            <section class="mapping" id="mapping">
+                <div>
+                    <strong>Map Columns</strong>
+                    <div class="muted" id="mappingMeta"></div>
+                </div>
+
+                <div class="mapping-grid">
+                    <div>
+                        <label for="ifscColumn">IFSC column</label>
+                        <select id="ifscColumn"></select>
+                    </div>
+                    <div>
+                        <label for="pincodeColumn">Pincode column</label>
+                        <select id="pincodeColumn"></select>
+                    </div>
+                </div>
+
+                <div class="sample" id="sample"></div>
+
+                <div class="actions">
+                    <button type="button" class="btn success" id="processBtn">Process File</button>
+                    <button type="button" class="btn secondary" id="resetBtn">Choose Another File</button>
+                </div>
+            </section>
+
+            <section class="summary" id="summary">
+                <div class="summary-grid">
+                    <div class="metric">
+                        <span class="metric-value" id="inputRows">0</span>
+                        <span class="metric-label">Input rows</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="matchedRows">0</span>
+                        <span class="metric-label">Matched rows</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="districtCount">0</span>
+                        <span class="metric-label">Districts</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="skippedRows">0</span>
+                        <span class="metric-label">Other rows</span>
+                    </div>
+                </div>
+                <div class="district-list" id="districtList"></div>
+            </section>
+
+            <section class="files-section" id="filesSection">
+                <strong>Available Downloads</strong>
+                <ul class="file-list" id="fileList"></ul>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const uploadForm = document.getElementById('uploadForm');
+        const previewBtn = document.getElementById('previewBtn');
+        const chooseBtn = document.getElementById('chooseBtn');
+        const processBtn = document.getElementById('processBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const mapping = document.getElementById('mapping');
+        const mappingMeta = document.getElementById('mappingMeta');
+        const ifscColumn = document.getElementById('ifscColumn');
+        const pincodeColumn = document.getElementById('pincodeColumn');
+        const sample = document.getElementById('sample');
+        const statusBox = document.getElementById('status');
+        const progress = document.getElementById('progress');
+        const summary = document.getElementById('summary');
+        const filesSection = document.getElementById('filesSection');
+
+        let uploadId = null;
+        let previewData = null;
+
+        chooseBtn.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (event) => {
+            event.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (event.dataTransfer.files.length) {
+                fileInput.files = event.dataTransfer.files;
+                handleFileChange();
+            }
+        });
+
+        fileInput.addEventListener('change', handleFileChange);
+        resetBtn.addEventListener('click', resetForm);
+
+        uploadForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            await previewFile();
+        });
+
+        processBtn.addEventListener('click', processFile);
+
+        function handleFileChange() {
+            uploadId = null;
+            previewData = null;
+            mapping.classList.remove('show');
+            summary.classList.remove('show');
+            statusBox.classList.remove('show');
+
+            if (!fileInput.files.length) {
+                fileInfo.classList.remove('show');
+                previewBtn.disabled = true;
+                return;
+            }
+
+            const file = fileInput.files[0];
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.classList.add('show');
+            previewBtn.disabled = false;
+        }
+
+        async function previewFile() {
+            if (!fileInput.files.length) {
+                showStatus('Please choose a file first.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            setBusy(true, 'Reading file columns...');
+            mapping.classList.remove('show');
+            summary.classList.remove('show');
+
+            try {
+                const data = await requestJson('/preview', {
+                    method: 'POST',
+                    body: formData
+                });
+                uploadId = data.upload_id;
+                previewData = data;
+                renderMapping(data);
+                showStatus('Columns loaded. Select the IFSC or Pincode columns, then process.', 'success');
+            } catch (error) {
+                showStatus(error.message, 'error');
+            } finally {
+                setBusy(false);
+            }
+        }
+
+        async function processFile() {
+            if (!uploadId) {
+                showStatus('Please read columns before processing.', 'error');
+                return;
+            }
+            if (ifscColumn.value === '__none__' && pincodeColumn.value === '__none__') {
+                showStatus('Select at least one column: IFSC or Pincode.', 'error');
+                return;
+            }
+
+            setBusy(true, 'Processing rows...');
+            summary.classList.remove('show');
+
+            try {
+                const data = await requestJson('/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        upload_id: uploadId,
+                        ifsc_column: ifscColumn.value,
+                        pincode_column: pincodeColumn.value
+                    })
+                });
+
+                displaySummary(data.summary);
+                const downloadLine = data.download_url ? `\nDownload: ${data.download_name}` : '';
+                const otherLine = data.other_count ? `\nOther rows: ${data.other_count}` : '';
+                showStatus(`File processed successfully.${downloadLine}${otherLine}`, 'success');
+                await loadFileList();
+                uploadId = null;
+            } catch (error) {
+                showStatus(error.message, 'error');
+            } finally {
+                setBusy(false);
+            }
+        }
+
+        async function requestJson(url, options) {
+            let response;
+            try {
+                response = await fetch(url, options);
+            } catch (error) {
+                throw new Error('Could not reach the app server. Check that run.bat is still open and you are on http://localhost:5001.');
+            }
+
+            const text = await response.text();
+            let data = {};
+            if (text) {
+                try {
+                    data = JSON.parse(text);
+                } catch (_error) {
+                    throw new Error(text.slice(0, 300) || 'Server returned an unreadable response.');
+                }
+            }
+
+            if (!response.ok) {
+                const details = formatErrors(data.errors);
+                throw new Error((data.error || 'Request failed') + details);
+            }
+
+            return data;
+        }
+
+        function renderMapping(data) {
+            fillSelect(ifscColumn, data.columns, data.suggested_ifsc_column);
+            fillSelect(pincodeColumn, data.columns, data.suggested_pincode_column);
+            mappingMeta.textContent = `${data.row_count} rows found in ${data.columns.length} columns.`;
+            sample.innerHTML = renderSample(data.columns, data.sample_rows || []);
+            mapping.classList.add('show');
+        }
+
+        function fillSelect(select, columns, selected) {
+            select.innerHTML = '<option value="__none__">No column</option>';
+            for (const column of columns) {
+                const option = document.createElement('option');
+                option.value = column;
+                option.textContent = column;
+                select.appendChild(option);
+            }
+            select.value = selected || '__none__';
+        }
+
+        function renderSample(columns, rows) {
+            if (!columns.length || !rows.length) {
+                return '';
+            }
+            const visibleColumns = columns.slice(0, 8);
+            const head = visibleColumns.map(column => `<th>${escapeHtml(column)}</th>`).join('');
+            const body = rows.map(row => {
+                return `<tr>${visibleColumns.map(column => `<td>${escapeHtml(row[column] || '')}</td>`).join('')}</tr>`;
+            }).join('');
+            return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+        }
+
+        function displaySummary(summaryData) {
+            document.getElementById('inputRows').textContent = summaryData.input_rows || 0;
+            document.getElementById('matchedRows').textContent = summaryData.matched_rows || 0;
+            document.getElementById('districtCount').textContent = summaryData.total_districts || 0;
+            document.getElementById('skippedRows').textContent = summaryData.other_rows || summaryData.skipped_rows || 0;
+
+            const districtList = document.getElementById('districtList');
+            districtList.innerHTML = Object.entries(summaryData.districts || {}).map(([district, data]) => {
+                return `<div class="district-item"><strong>${escapeHtml(district)}</strong><span>${data.record_count} rows</span></div>`;
+            }).join('');
+
+            summary.classList.add('show');
+        }
+
+        async function loadFileList() {
+            try {
+                const data = await requestJson('/files', { method: 'GET' });
+                if (!data.files || !data.files.length) {
+                    filesSection.classList.remove('show');
+                    return;
+                }
+
+                filesSection.classList.add('show');
+                document.getElementById('fileList').innerHTML = data.files.map(file => {
+                    return `<li class="file-list-item"><a href="/download/${encodeURIComponent(file.name)}" download>${escapeHtml(file.name)}</a><span class="muted">${formatFileSize(file.size)}</span></li>`;
+                }).join('');
+            } catch (_error) {
+                filesSection.classList.remove('show');
+            }
+        }
+
+        function resetForm() {
+            fileInput.value = '';
+            uploadId = null;
+            previewData = null;
+            fileInfo.classList.remove('show');
+            mapping.classList.remove('show');
+            summary.classList.remove('show');
+            statusBox.classList.remove('show');
+            previewBtn.disabled = true;
+        }
+
+        function setBusy(isBusy, message) {
+            previewBtn.disabled = isBusy || !fileInput.files.length;
+            processBtn.disabled = isBusy;
+            progress.classList.toggle('show', isBusy);
+            if (isBusy && message) {
+                showStatus(message, 'info');
+            }
+        }
+
+        function showStatus(message, type) {
+            statusBox.textContent = message;
+            statusBox.className = `status show ${type}`;
+        }
+
+        function formatErrors(errors) {
+            if (!Array.isArray(errors) || !errors.length) {
+                return '';
+            }
+            const lines = errors.slice(0, 5).map(error => {
+                if (typeof error === 'string') {
+                    return error;
+                }
+                return `Row ${error.row || '?'}: ${error.reason || 'Could not process row'}`;
+            });
+            return `\n${lines.join('\n')}`;
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes) return '0 Bytes';
+            const units = ['Bytes', 'KB', 'MB', 'GB'];
+            const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+            const value = bytes / Math.pow(1024, index);
+            return `${Math.round(value * 100) / 100} ${units[index]}`;
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        loadFileList();
+    </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment
+.env
+venv/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Data files (optional - remove if you want to track)
+*.xlsx
+*.csv
+data/*.xlsx
+data/*.csv
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Coverage
+.coverage
+htmlcov/
+
+# Hypothesis
+.hypothesis/
+
+# KYC mailer: page password hash and send history
+data/kyc_mailer_access.json
+data/kyc_mail_sent_log.csv
+# KYC mailer: record screenshots and the WhatsApp login profile
+KYC Mail Records/
+data/whatsapp_profile/
+
+.pytest_cache/
+.test_tmp*/
+*.pdf
+*.zip
+

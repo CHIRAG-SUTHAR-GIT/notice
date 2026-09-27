@@ -1,0 +1,13 @@
+streamlit
+pandas
+openpyxl
+xlrd
+rapidfuzz
+hypothesis
+pytest
+pytest-cov
+reportlab
+python-docx
+pypdf
+google-generativeai
+mysql-connector-python
